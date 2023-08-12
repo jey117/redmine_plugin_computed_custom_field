@@ -16,13 +16,19 @@ else
   preparation_class = ActionDispatch::Callbacks
 end
 
-preparation_class.to_prepare do
-  require_dependency 'computed_custom_field/computed_custom_field'
-  require_dependency 'computed_custom_field/custom_field_patch'
-  require_dependency 'computed_custom_field/custom_fields_helper_patch'
-  require_dependency 'computed_custom_field/model_patch'
-  require_dependency 'computed_custom_field/issue_patch'
-  require_dependency 'computed_custom_field/hooks'
+if Rails.configuration.respond_to?(:autoloader) && Rails.configuration.autoloader == :zeitwerk
+  Rails.autoloaders.each { |loader| loader.ignore(File.dirname(__FILE__) + '/lib') }
+  require File.dirname(__FILE__) + '/lib/computed_custom_field'
+  # require_relative File.dirname(__FILE__) + '/lib/computed_custom_field/computed_custom_field.rb'
+else
+  preparation_class.to_prepare do
+    require_dependency 'computed_custom_field/computed_custom_field'
+    require_dependency 'computed_custom_field/custom_field_patch'
+    require_dependency 'computed_custom_field/custom_fields_helper_patch'
+    require_dependency 'computed_custom_field/model_patch'
+    require_dependency 'computed_custom_field/issue_patch'
+    require_dependency 'computed_custom_field/hooks'
+  end
 end
 
 RedmineApp::Application.configure do
